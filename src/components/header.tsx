@@ -3,8 +3,19 @@ import styled, { css, StyledComponent } from 'react-emotion';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { Theme } from '../utils/theme';
 import Navigation from './navitation';
+import { fromEvent, Subscription } from 'rxjs';
+import {
+  throttleTime,
+  pairwise,
+  map,
+  distinctUntilChanged,
+} from 'rxjs/operators';
 
-const StyledHeader: StyledComponent<any, any, Theme> = styled('header')`
+const StyledHeader: StyledComponent<
+  { isVisible: boolean },
+  any,
+  Theme
+> = styled('header')`
   background-color: ${props => props.theme.colors.primary};
   color: white;
   padding: 1rem;
@@ -16,6 +27,9 @@ const StyledHeader: StyledComponent<any, any, Theme> = styled('header')`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: transform 200ms ease-in;
+  transform: ${props =>
+    props.isVisible ? 'translateY(0)' : 'translateY(-100%)'};
 `;
 
 const Title = styled('h1')`
@@ -42,23 +56,64 @@ const Hamburger: React.StatelessComponent<{
   </button>
 );
 
-export class Header extends React.Component<any, { isOpen: boolean }> {
+enum Direction {
+  Up = 'Up',
+  Down = 'Down',
+}
+export class Header extends React.Component<
+  any,
+  { isHeaderVisible: boolean; isNavigationOpen: boolean }
+> {
   state = {
-    isOpen: false,
+    isHeaderVisible: true,
+    isNavigationOpen: false,
   };
 
-  toggle = () => {
-    this.setState(prev => ({ isOpen: !prev.isOpen }));
+  private subscription: Subscription;
+
+  componentDidMount() {
+    this.subscription = fromEvent<Event>(window, 'scroll')
+      .pipe(
+        map(() => window.pageYOffset),
+        pairwise(),
+        map(([y1, y2]): Direction => (y2 < y1 ? Direction.Up : Direction.Down)),
+        distinctUntilChanged(),
+        map(direction => direction === Direction.Up)
+      )
+      .subscribe(isHeaderVisible => this.setState({ isHeaderVisible }));
+  }
+
+  componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  toggleNavigation = () => {
+    this.setState(prev => {
+      const nextIsNavigationOpen = !prev.isNavigationOpen;
+
+      if (nextIsNavigationOpen) {
+        document.documentElement.classList.add('no-scroll');
+      } else {
+        document.documentElement.classList.remove('no-scroll');
+      }
+
+      return { isNavigationOpen: nextIsNavigationOpen };
+    });
   };
 
   render() {
     return (
       <>
-        <StyledHeader>
+        <StyledHeader isVisible={this.state.isHeaderVisible}>
           <Title>Kulinarnia</Title>
-          <Hamburger isOpen={this.state.isOpen} isOpenChange={this.toggle} />
+          <Hamburger
+            isOpen={this.state.isNavigationOpen}
+            isOpenChange={this.toggleNavigation}
+          />
         </StyledHeader>
-        <Navigation isOpen={this.state.isOpen} />
+        <Navigation isOpen={this.state.isNavigationOpen} />
       </>
     );
   }

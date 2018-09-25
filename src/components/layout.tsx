@@ -29,7 +29,10 @@ const Layout: React.StatelessComponent = ({ children }) => (
           <html lang="en" />
         </Helmet>
         <ThemeProvider theme={theme}>
-          <Header />
+          <>
+            <Header />
+            {children}
+          </>
         </ThemeProvider>
       </>
     )}
