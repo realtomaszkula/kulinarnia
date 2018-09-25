@@ -1,35 +1,67 @@
 import * as React from 'react';
-import { Link } from 'gatsby';
+import styled, { css, StyledComponent } from 'react-emotion';
+import { FaBars, FaTimes } from 'react-icons/fa';
+import { Theme } from '../utils/theme';
+import Navigation from './navitation';
 
-const Header: React.StatelessComponent<{ siteTitle: string }> = ({
-  siteTitle,
-}) => (
-  <div
-    style={{
-      background: 'rebeccapurple',
-      marginBottom: '1.45rem',
-    }}
+const StyledHeader: StyledComponent<any, any, Theme> = styled('header')`
+  background-color: ${props => props.theme.colors.primary};
+  color: white;
+  padding: 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: ${props => props.theme.layout.headerHeight};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const Title = styled('h1')`
+  padding: 0;
+  margin: 0;
+  user-select: none;
+`;
+
+const Hamburger: React.StatelessComponent<{
+  isOpenChange: React.EventHandler<any>;
+  isOpen: boolean;
+}> = ({ isOpenChange, isOpen }) => (
+  <button
+    onClick={isOpenChange}
+    className={css`
+      color: white;
+      background: none;
+      outline: white;
+      border: none;
+      cursor: pointer;
+    `}
   >
-    <div
-      style={{
-        margin: '0 auto',
-        maxWidth: 960,
-        padding: '1.45rem 1.0875rem',
-      }}
-    >
-      <h1 style={{ margin: 0 }}>
-        <Link
-          to="/"
-          style={{
-            color: 'white',
-            textDecoration: 'none',
-          }}
-        >
-          {siteTitle}
-        </Link>
-      </h1>
-    </div>
-  </div>
+    {isOpen ? <FaTimes size="32" /> : <FaBars size="32" />}
+  </button>
 );
+
+export class Header extends React.Component<any, { isOpen: boolean }> {
+  state = {
+    isOpen: false,
+  };
+
+  toggle = () => {
+    this.setState(prev => ({ isOpen: !prev.isOpen }));
+  };
+
+  render() {
+    return (
+      <>
+        <StyledHeader>
+          <Title>Kulinarnia</Title>
+          <Hamburger isOpen={this.state.isOpen} isOpenChange={this.toggle} />
+        </StyledHeader>
+        <Navigation isOpen={this.state.isOpen} />
+      </>
+    );
+  }
+}
 
 export default Header;
