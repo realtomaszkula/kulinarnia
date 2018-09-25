@@ -1,7 +1,9 @@
-import React from 'react'
-import { Link } from 'gatsby'
+import * as React from 'react';
+import { Link } from 'gatsby';
 
-const Header = ({ siteTitle }) => (
+const Header: React.StatelessComponent<{ siteTitle: string }> = ({
+  siteTitle,
+}) => (
   <div
     style={{
       background: 'rebeccapurple',
@@ -28,6 +30,6 @@ const Header = ({ siteTitle }) => (
       </h1>
     </div>
   </div>
-)
+);
 
-export default Header
+export default Header;

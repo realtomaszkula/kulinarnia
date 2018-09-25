@@ -4,6 +4,7 @@ module.exports = {
   },
   plugins: [
     'gatsby-plugin-react-helmet',
+    'gatsby-plugin-typescript',
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
@@ -18,4 +19,4 @@ module.exports = {
     },
     'gatsby-plugin-offline',
   ],
-}
+};
